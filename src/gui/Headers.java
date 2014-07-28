@@ -55,6 +55,8 @@ public class Headers {
 //			System.out.println("lol");
 //			super.repaint();
 //		}
+
+
 		
 		@Override
 		public void paintComponent(Graphics g2)

@@ -16,6 +16,7 @@ import java.util.Vector;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -46,7 +47,7 @@ public class ColumnThread extends Thread
 	AtomicBoolean delayCalibration;
 	int zeroAnimationTime = -1;
 	int framewaitms = 7;
-	
+	int currentseed = 0;
 	int lastWidth = 0;
 	 int [] animationOrder = null;
 	 AtomicBoolean colChanged;
@@ -58,7 +59,7 @@ public class ColumnThread extends Thread
 	 int [][] currentCountUpdate = null;
 	 Residue.ResidueType [] consRes = null;
 	 AtomicBoolean completed;
-
+    boolean editSinceCountdown = false;
 	//Alignment al;
 	AtomicInteger startCompute = null;
 	AtomicInteger endCompute = null;
@@ -76,7 +77,6 @@ public class ColumnThread extends Thread
 	}
 	@Override
 	public void run() {
-		
 		foreverloop:
 		while(true)
 		{
@@ -302,8 +302,73 @@ public class ColumnThread extends Thread
 		SwingUtilities.invokeLater(new Runnable(){public void run() {Alignment.al.panel.headers.tch.repaint();}});
 		
 	}
+
+    public void stalledUpdate(final int seed)
+    {
+
+        synchronized (schedulerLock)
+        {
+            synchronized(Alignment.al.ct.paintLock)
+            {
+                stopPainting = true;
+                Alignment.al.ct.currentCountUpdate=null;
+
+            }
+            Alignment.al.panel.headers.tch.repaint();
+
+            if(currentColDelayedTask==null ||currentColDelayedTask.isDone())
+            {
+                editSinceCountdown = false;
+                Runnable currentTask = new Runnable() {
+                    @Override
+                    public void run() {
+                        synchronized (schedulerLock) {
+                            if(editSinceCountdown)
+                            {
+                                editSinceCountdown=false;
+                                synchronized(Alignment.al.ct.paintLock)
+                                {
+                                    stopPainting = true;
+                                    Alignment.al.ct.currentCountUpdate=null;
+
+                                }
+
+                                currentColDelayedTask = scheduler.schedule(this,stalledDelayMs, java.util.concurrent.TimeUnit.MILLISECONDS);
+                            }
+                            else {
+                                stopPainting = false;
+                                Alignment.al.ct.startCompute.set(startCompute.get());
+                                Alignment.al.ct.endCompute.set(endCompute.get());
+                                Alignment.al.ct.seed.set(seed);
+                                Alignment.al.ct.colChanged.set(true);
+                                synchronized (Alignment.al.ct.colSleeper) {
+                                    Alignment.al.ct.colSleeper.notify();
+                                }
+                            }
+
+                        }
+                    }
+
+
+                };
+                synchronized(Alignment.al.ct.paintLock)
+                {
+                    stopPainting = true;
+                    Alignment.al.ct.currentCountUpdate=null;
+
+                }
+                currentColDelayedTask = scheduler.schedule(currentTask, stalledDelayMs, java.util.concurrent.TimeUnit.MILLISECONDS);
+
+            }
+            else
+            {
+                editSinceCountdown=true;
+                //do nothing really
+            }
+        }
+    }
 	
-	public void stalledUpdate(final int seed)
+	public void stalledUpdateOld(final int seed)
 	{
 		Runnable currentTask = new Runnable(){
 		

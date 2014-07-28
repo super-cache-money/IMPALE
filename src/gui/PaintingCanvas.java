@@ -39,7 +39,9 @@ public class PaintingCanvas extends JComponent{
 	ActionMap am;
 	HashMap<String,Boolean> isKeyPressed;
 	boolean mousePressedSinceLastKey = false;
-	public PaintingCanvas()
+    private int repaintCount = 0;
+
+    public PaintingCanvas()
 	{
 		super();
 		
@@ -152,7 +154,7 @@ public class PaintingCanvas extends JComponent{
 	//public void 
 	public void paintComponent(Graphics g)
 	{
-		
+        long starttime = System.currentTimeMillis();
 		synchronized(Alignment.al.autoscrollLock)
 		{
 			Alignment.al.autoscrollrepaint = true;
@@ -172,13 +174,18 @@ public class PaintingCanvas extends JComponent{
 			g.drawImage(bimg,0,0,this);
 			//System.out.println("PRINTED CLIP!" + g.getClipBounds() + " Component size " + getSize());
 			//g.drawImage
+        System.out.println("Time taken: " + (System.currentTimeMillis()-starttime));
 
 
 	}
 	
 	@Override public void repaint()
 	{
+//        System.out.println("Repainting..." + repaintCount);
+//        repaintCount++;
+
 		super.repaint();
+
 	}
 	public void  updateBuffer()
 	{
