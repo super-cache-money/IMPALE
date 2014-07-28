@@ -1,0 +1,106 @@
+l 1 w 1
+path to jar:/C:/Users/arjun/Documents/IMPALE_dev_build/IMPALE/
+file:/C:/Users/arjun/Documents/IMPALE_dev_build/IMPALE/internals.jar!/BLOSUM62.txt
+PATH C:\Users\arjun\Documents\IMPALE_dev_build\IMPALE\temp\temp_IMPALE.fas
+
+Here
+hash 336d5ebc5436534e61d16e63ddfca327
+length1width1
+Succesfully written
+Can't load recent file list yet...
+canvas.
+busyicon jar:file:/C:/Users/arjun/Documents/IMPALE_dev_build/IMPALE/internals.jar!/busyfalse.gif
+java.awt.Dimension[width=30,height=30] prefsize
+NBjava.awt.Dimension[width=66,height=50]
+STATS-seqs=1longestSeq=1
+1netlength
+about to wait!
+java.awt.Dimension[width=1008,height=70]
+java.awt.Dimension[width=9,height=311]
+error....who gives a shit lol
+it took 1ms
+Writing settings to file...
+closing queueworker thread
+You chose C:\Users\arjun\Downloads\test.fas
+file:/C:/Users/arjun/Documents/IMPALE_dev_build/IMPALE/internals.jar!/BLOSUM62.txt
+PATH C:\Users\arjun\Documents\IMPALE_dev_build\IMPALE\temp\temp_IMPALE.fas
+
+Here
+hash d68ae057bfc83ed5b989edacceb07042
+length184width2096
+Succesfully written
+Can't load recent file list yet...
+canvas.
+busyicon jar:file:/C:/Users/arjun/Documents/IMPALE_dev_build/IMPALE/internals.jar!/busyfalse.gif
+java.awt.Dimension[width=30,height=30] prefsize
+NBjava.awt.Dimension[width=66,height=50]
+STATS-seqs=184longestSeq=2096
+184netlength
+about to wait!
+C:\Users\arjun\Downloads\test.fas
+java.awt.Dimension[width=1008,height=70]
+java.awt.Dimension[width=117,height=311]
+STICKY done
+error....who gives a shit lol
+it took 8ms
+Recomputing errthang
+done waiting! gobble gobble
+updating scoring stickyblocks
+redooing everything
+2096
+WORKER DONE
+time for ani 16 , 8ms
+3 left
+2 left
+1 left
+all done!
+Min 25572417 25574975
+score:25574975 time:516
+about to wait!
+Writing settings to file...
+closing queueworker thread
+path to jar:/C:/Users/arjun/Documents/IMPALE_dev_build/IMPALE/
+CMD /C "'C:\Users\arjun\Documents\IMPALE_dev_build\IMPALE\dependencies\muscle_win_32.exe' -in 'C:\Users\arjun\Documents\IMPALE_dev_build\IMPALE\temp\temp_IMPALE.fas' -out 'C:\Users\arjun\Documents\IMPALE_dev_build\IMPALE\temp\UNSAVED' -gapopen -2 -gapextend -1 -maxmb 4096 -maxiters 8 -cluster1 UPGMB -cluster2 UPGMB -diaglength 24  -seqtype DNA"
+Done
+CMD /C "'C:\Users\arjun\Documents\IMPALE_dev_build\IMPALE\dependencies\muscle_win_32.exe' -in 'C:\Users\arjun\Documents\IMPALE_dev_build\IMPALE\temp\temp_IMPALE.fas' -out 'C:\Users\arjun\Documents\IMPALE_dev_build\IMPALE\temp\UNSAVED' -gapopen -2 -gapextend -1 -maxmb 4096 -maxiters 8 -cluster1 UPGMB -cluster2 UPGMB -diaglength 24  -seqtype DNA"
+Muscle log:
+00:00:01      7 MB(0%)  Iter   1   76.39%  K-mer dist pass 2
+00:00:09    103 MB(5%)  Iter   1   36.61%  Align node
+00:00:18    188 MB(8%)  Iter   1   77.60%  Align node
+00:00:23   233 MB(10%)  Iter   1   94.02%  Root alignment
+00:00:23   233 MB(10%)  Iter   1   94
+file:/C:/Users/arjun/Documents/IMPALE_dev_build/IMPALE/internals.jar!/BLOSUM62.txt
+PATH C:\Users\arjun\Documents\IMPALE_dev_build\IMPALE\temp\temp_IMPALE.fas
+
+Here
+hash d68ae057bfc83ed5b989edacceb07042
+length184width2096
+Succesfully written
+Can't load recent file list yet...
+canvas.
+busyicon jar:file:/C:/Users/arjun/Documents/IMPALE_dev_build/IMPALE/internals.jar!/busyfalse.gif
+java.awt.Dimension[width=30,height=30] prefsize
+NBjava.awt.Dimension[width=66,height=50]
+STATS-seqs=184longestSeq=2096
+184netlength
+about to wait!
+C:\Users\arjun\Downloads\test.fas
+java.awt.Dimension[width=1008,height=70]
+java.awt.Dimension[width=117,height=311]
+STICKY done
+error....who gives a shit lol
+it took 3ms
+Recomputing errthang
+done waiting! gobble gobble
+updating scoring stickyblocks
+redooing everything
+2096
+WORKER DONE
+time for ani 6 , 8ms
+3 left
+2 left
+1 left
+all done!
+Min 25572417 25574975
+score:25574975 time:475
+about to wait!
