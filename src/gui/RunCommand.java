@@ -1,25 +1,19 @@
 package gui;
 
-import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.security.CodeSource;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.swing.BoxLayout;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 
@@ -249,11 +243,11 @@ public class RunCommand {
 		jarDirPath = new File( path).getAbsolutePath();
 		muscleOutpath = jarDirPath+File.separator + "temp" + File.separator+"UNSAVED";
 		
-		if(OSValidator.isWindows())
+		if(OSTools.isWindows())
 			cmdList = getMuscleCommandWin(params);
-		else if(OSValidator.isMac())
+		else if(OSTools.isMac())
 			cmdList = getMuscleCommandMac(params);
-		else if(OSValidator.isUnix())
+		else if(OSTools.isUnix())
 			cmdList = getMuscleCommandLin(params);
 		else
 		{

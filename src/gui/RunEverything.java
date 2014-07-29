@@ -7,11 +7,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.InvocationTargetException;
-import java.net.URISyntaxException;
 import java.net.URLDecoder;
-import java.security.CodeSource;
-import java.util.regex.Pattern;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -124,9 +120,7 @@ public RunEverything(Alignment al)
 	
 	public static void main (String []args)
 	{
-		if(!System.getProperty("java.vm.vendor").equals("Oracle Corporation"))
-			JOptionPane.showMessageDialog(null, "You have the wrong java installed. Your version's vendor is: \n"+System.getProperty("java.vm.vendor")+"\n\nDownload and install the correct version from www.java.com to ensure IMPALE functions as it should." );
-			
+        OSTools.validateJVM();
 		//		if(args[0]!=null)
 //			IO.lengthmult = Integer.parseInt(args[0]);
 //		if(args[1]!=null)

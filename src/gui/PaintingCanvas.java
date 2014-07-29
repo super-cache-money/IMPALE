@@ -1,26 +1,26 @@
 package gui;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
+import javax.imageio.ImageIO;
 import javax.swing.Action;
 import javax.swing.ActionMap;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
-//brokkie42
+
+
 public class PaintingCanvas extends JComponent{
 
 	private static final long serialVersionUID = 1L;
@@ -39,12 +39,16 @@ public class PaintingCanvas extends JComponent{
 	ActionMap am;
 	HashMap<String,Boolean> isKeyPressed;
 	boolean mousePressedSinceLastKey = false;
+    GraphicsConfiguration gfx_config;
+
     private int repaintCount = 0;
 
     public PaintingCanvas()
 	{
 		super();
-		
+       gfx_config  = GraphicsEnvironment.
+                getLocalGraphicsEnvironment().getDefaultScreenDevice().
+                getDefaultConfiguration();
 		savedMap = new InputMap();
 //		savedMap.
 		isKeyPressed = new HashMap<String, Boolean>()
@@ -152,8 +156,11 @@ public class PaintingCanvas extends JComponent{
 //		this.setInputMap(WHEN_FOCUSED, savedMap);
 	}
 	//public void 
-	public void paintComponent(Graphics g)
+	public void paintComponent(Graphics g2)
 	{
+        Graphics2D g = (Graphics2D) g2;
+        g.setRenderingHint(RenderingHints.KEY_RENDERING,RenderingHints.VALUE_RENDER_SPEED);
+        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
         long starttime = System.currentTimeMillis();
 		synchronized(Alignment.al.autoscrollLock)
 		{
@@ -171,7 +178,7 @@ public class PaintingCanvas extends JComponent{
 			updateBuffer();
 			//RescaleOp op = new RescaleOp(1.3f, 0, null);
 			//bimg = op.filter(bimg, null);
-			g.drawImage(bimg,0,0,this);
+			g.drawImage(bimg,0,0,bimg.getWidth()/OSTools.retinaMultiplier,bimg.getHeight()/OSTools.retinaMultiplier,this);
 			//System.out.println("PRINTED CLIP!" + g.getClipBounds() + " Component size " + getSize());
 			//g.drawImage
         System.out.println("Time taken: " + (System.currentTimeMillis()-starttime));
@@ -196,8 +203,20 @@ public class PaintingCanvas extends JComponent{
 		if(bimg==null)
 		{//System.out.println("WIDTH" + viewport.width);
 			try{
-			bimg = new BufferedImage(viewport.width*viewport.fontWidth, viewport.height*viewport.fontHeight, BufferedImage.TYPE_INT_ARGB);
-			bufferg =  (Graphics2D) bimg.getGraphics();
+//			bimg = new BufferedImage(viewport.width*viewport.fontWidth, viewport.height*viewport.fontHeight, BufferedImage.TYPE_INT_ARGB);
+
+                bimg = gfx_config.createCompatibleImage(OSTools.retinaMultiplier*viewport.width*viewport.fontWidth, OSTools.retinaMultiplier*viewport.height*viewport.fontHeight);
+			bufferg =   (Graphics2D) bimg.getGraphics();
+//                bufferg.setRenderingHint(
+//                        RenderingHints.KEY_ANTIALIASING,
+//                        RenderingHints.VALUE_ANTIALIAS_ON);
+//
+                bufferg.setRenderingHint(
+                        RenderingHints.KEY_TEXT_ANTIALIASING,
+                        RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+
+                bufferg.setRenderingHint(RenderingHints.KEY_RENDERING,RenderingHints.VALUE_RENDER_SPEED);
+
 			}
 			catch(IllegalArgumentException lol)
 			{
@@ -215,7 +234,7 @@ public class PaintingCanvas extends JComponent{
 		if(clean)
 		{
 			bufferg.setColor(kirtanya);
-			bufferg.fillRect(0, 0, getWidth(), getHeight());
+			bufferg.fillRect(0, 0, bimg.getWidth(), bimg.getHeight());
 			
 			redrawArea(0,0,viewport.startres, viewport.startseq, viewport.width, viewport.height);
 			clean = false;
@@ -223,28 +242,28 @@ public class PaintingCanvas extends JComponent{
 		
 		else
 		{
-			bufferg = (Graphics2D) bimg.getGraphics();
+
 			int xdiff = oldresbuffered - viewport.startres;
 			int ydiff = oldseqbuffered - viewport.startseq;
 			if(xdiff > 0) //scroll left
 			{
-				bufferg.copyArea(0, 0, (viewport.width-xdiff)*viewport.fontWidth, getHeight(), xdiff*viewport.fontWidth, 0);
+				bufferg.copyArea(0, 0, OSTools.retinaMultiplier*(viewport.width-xdiff)*viewport.fontWidth, bimg.getHeight(), OSTools.retinaMultiplier*xdiff*viewport.fontWidth, 0);
 				redrawArea(0,0, viewport.startres,viewport.startseq,xdiff, viewport.height);
 			}
 			else if(xdiff < 0) //scroll right
 			{
 				//bufferg.setClip();
-				bufferg.copyArea(-(xdiff)*viewport.fontWidth, 0, (viewport.width+xdiff)*viewport.fontWidth, getHeight(), xdiff*viewport.fontWidth, 0);
+				bufferg.copyArea(-OSTools.retinaMultiplier*(xdiff)*viewport.fontWidth, 0, OSTools.retinaMultiplier*(viewport.width+xdiff)*viewport.fontWidth, bimg.getHeight(), OSTools.retinaMultiplier*xdiff*viewport.fontWidth, 0);
 				redrawArea(viewport.width +xdiff, 0, viewport.endres +  xdiff + 1, viewport.startseq, -xdiff, viewport.height);
 			}
 			if(ydiff > 0)//scroll up
 			{
-				bufferg.copyArea(0, 0, getWidth(), (viewport.height - ydiff)*viewport.fontHeight, 0, ydiff*viewport.fontHeight);
+				bufferg.copyArea(0, 0, bimg.getWidth(), OSTools.retinaMultiplier*(viewport.height - ydiff)*viewport.fontHeight, 0, OSTools.retinaMultiplier*ydiff*viewport.fontHeight);
 				redrawArea(0, 0, viewport.startres, viewport.startseq, viewport.width, ydiff);
 			}
 			else if (ydiff < 0) //scroll down
 			{
-				bufferg.copyArea(0, -ydiff*viewport.fontHeight, getWidth(), (viewport.height + ydiff)*viewport.fontHeight, 0, ydiff*viewport.fontHeight);
+				bufferg.copyArea(0, -OSTools.retinaMultiplier*ydiff*viewport.fontHeight, bimg.getWidth(), OSTools.retinaMultiplier*(viewport.height + ydiff)*viewport.fontHeight, 0, OSTools.retinaMultiplier*ydiff*viewport.fontHeight);
 				redrawArea(0, viewport.height+ydiff, viewport.startres, viewport.endseq + 1 +ydiff, viewport.width, -ydiff);
 			}
 			if(!Alignment.al.changed.isEmpty())
@@ -264,8 +283,8 @@ public class PaintingCanvas extends JComponent{
 			}
 			
 		}
-		
-		oldresbuffered = viewport.startres;
+//
+        oldresbuffered = viewport.startres;
 		oldseqbuffered = viewport.startseq;
 	}
 	
@@ -282,7 +301,7 @@ public class PaintingCanvas extends JComponent{
 				rp.location[0] = startres+j;
 				rp.location[1] = startseq+i;
 				final Residue r = Alignment.al.get(startseq+i).get(startres+j);
-				bufferg.setFont(font2);
+				bufferg.setFont(font2.deriveFont(2f*font2.getSize()));
 				if(Alignment.al.columnIsSticky.get(startres+ j))
 				{
 					oldfont = bufferg.getFont();
@@ -292,7 +311,7 @@ public class PaintingCanvas extends JComponent{
 				{
 					//System.out.println("INVERSE " + r.colour + r.inverse);
 					bufferg.setColor(r.getInverse());
-					bufferg.fillRect(viewport.fontWidth*(startrespos + j), viewport.fontHeight*(startseqpos+i), viewport.fontWidth, viewport.fontHeight);
+					bufferg.fillRect(OSTools.retinaMultiplier*viewport.fontWidth*(startrespos + j), OSTools.retinaMultiplier*viewport.fontHeight*(startseqpos+i), OSTools.retinaMultiplier*viewport.fontWidth, OSTools.retinaMultiplier*viewport.fontHeight);
 					bufferg.setColor(Color.WHITE);
 					oldfont = bufferg.getFont();
 					bufferg.setFont(new Font(oldfont.getName(), oldfont.getStyle() + Font.ITALIC, oldfont.getSize()));
@@ -300,13 +319,13 @@ public class PaintingCanvas extends JComponent{
 				else
 				{
 				bufferg.setColor(r.getColor());
-				bufferg.fillRect(viewport.fontWidth*(startrespos + j), viewport.fontHeight*(startseqpos+i), viewport.fontWidth, viewport.fontHeight);
+				bufferg.fillRect(OSTools.retinaMultiplier*viewport.fontWidth*(startrespos + j), OSTools.retinaMultiplier*viewport.fontHeight*(startseqpos+i), OSTools.retinaMultiplier*viewport.fontWidth, OSTools.retinaMultiplier*viewport.fontHeight);
 				bufferg.setColor(Color.BLACK);
 				
 				}
 				//There is a height offset
 				//also, each string shifted 1 to the right
-				bufferg.drawString(r.toString(), viewport.fontWidth*(startrespos+j) + 1, viewport.fontHeight*(startseqpos+i) +  viewport.heightOffset);
+				bufferg.drawString(r.toString(), OSTools.retinaMultiplier*viewport.fontWidth*(startrespos+j) + 1, OSTools.retinaMultiplier*viewport.fontHeight*(startseqpos+i) +  OSTools.retinaMultiplier*viewport.heightOffset);
 				
 				
 			}
@@ -852,39 +871,41 @@ public class PaintingCanvas extends JComponent{
 		
 	};
 	Action keyPressSAction = new MeatyAction()
-	{
+    {
 
-		@Override
-		public void actionMeat(ActionEvent e) {
-			if(isKeyPressed.get("s"))
-				return;
-			isKeyPressed.put("s", true);
-			mousePressedSinceLastKey=false;
-			// TODO Auto-generated method stub
-			
-		}
-		
-	};
-	Action keyReleaseSAction = new MeatyAction()
-	{
+        @Override
+        public void actionMeat(ActionEvent e) {
+            if(isKeyPressed.get("s"))
+                return;
+            isKeyPressed.put("s", true);
+            mousePressedSinceLastKey=false;
+            // TODO Auto-generated method stub
 
-		@Override
-		public void actionMeat(ActionEvent e) {
-			isKeyPressed.put("s", false);
-			// TODO Auto-generated method stub
-			if(SimilarEngine.firstExtend ==true)
-			{
+        }
+
+    };
+    Action keyReleaseSAction = new MeatyAction()
+    {
+
+
+        @Override
+        public void actionMeat(ActionEvent e) {
+            isKeyPressed.put("s", false);
+
+            // TODO Auto-generated method stub
+            if(SimilarEngine.firstExtend ==true)
+            {
                 SimilarEngine.selectSimilarMain(true);
-			}
+            }
             Alignment.al.panel.cma.findingSimilar=false;
-		}
-		
-	};
+        }
 
-	
-	
-	
-	
+    };
 
-	
+
+
+
+
+
+
 }

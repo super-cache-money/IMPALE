@@ -1,8 +1,6 @@
 package gui;
 
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Font;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.FileInputStream;
@@ -658,23 +656,24 @@ public class MainMenu extends JMenuBar{
 
 		@Override
 		public void actionMeat(ActionEvent e) {
+            System.out.println("RETINA? " + OSTools.isRetina());
 
-
-            if(SimilarEngine.firstExtend)
-            {
-                boolean extendSuccess = SimilarEngine.firstExtendCache();
-                if(!extendSuccess)
-                    return;
-
-            }
-            else
-            {
-                System.out.println("similarScrolling...");
-            }
-            SimilarEngine.similarJump=0;
-            SimilarEngine.similarBound=0;
-            int oldSimilarFound = SimilarEngine.similarSeqsFound;
-            HashSet<Integer> similarSeqs = SimilarEngine.getSimilarSequences();
+//
+//            if(SimilarEngine.firstExtend)
+//            {
+//                boolean extendSuccess = SimilarEngine.firstExtendCache();
+//                if(!extendSuccess)
+//                    return;
+//
+//            }
+//            else
+//            {
+//                System.out.println("similarScrolling...");
+//            }
+//            SimilarEngine.similarJump=0;
+//            SimilarEngine.similarBound=0;
+//            int oldSimilarFound = SimilarEngine.similarSeqsFound;
+//            HashSet<Integer> similarSeqs = SimilarEngine.getSimilarSequences();
 //            showSettings();
 //		    MuscleFrame muscleProgressFrame = new MuscleFrame();
 //		     muscleProgressFrame.setTitle("Muscle Alignment Progress");
@@ -1275,7 +1274,7 @@ public class MainMenu extends JMenuBar{
 					IO.lastFile = oldLastFile;
 					Alignment.al.format = oldformat;
 					System.out.println(cmd);
-					if(OSValidator.isWindows())
+					if(OSTools.isWindows())
 					cmd = "CMD /c " + cmd;
 					Runtime rt = Runtime.getRuntime();
 					try {
