@@ -30,7 +30,7 @@ public class PaintingCanvas extends JComponent{
 	Font fontSelected;
 //	Alignment al;
 	public boolean clean;
-	public BufferedImage bimg;
+	public Image bimg;
 	int oldresbuffered, oldseqbuffered;
 	Graphics2D bufferg;
 	
@@ -178,7 +178,7 @@ public class PaintingCanvas extends JComponent{
 			updateBuffer();
 			//RescaleOp op = new RescaleOp(1.3f, 0, null);
 			//bimg = op.filter(bimg, null);
-			g.drawImage(bimg,0,0,bimg.getWidth()/OSTools.retinaMultiplier,bimg.getHeight()/OSTools.retinaMultiplier,this);
+			g.drawImage(bimg,0,0,bimg.getWidth(null)/OSTools.retinaMultiplier,bimg.getHeight(null)/OSTools.retinaMultiplier,this);
 			//System.out.println("PRINTED CLIP!" + g.getClipBounds() + " Component size " + getSize());
 			//g.drawImage
         System.out.println("Time taken: " + (System.currentTimeMillis()-starttime));
@@ -206,6 +206,7 @@ public class PaintingCanvas extends JComponent{
 //			bimg = new BufferedImage(viewport.width*viewport.fontWidth, viewport.height*viewport.fontHeight, BufferedImage.TYPE_INT_ARGB);
 
                 bimg = gfx_config.createCompatibleImage(OSTools.retinaMultiplier*viewport.width*viewport.fontWidth, OSTools.retinaMultiplier*viewport.height*viewport.fontHeight);
+                bimg.setAccelerationPriority(1);
 			bufferg =   (Graphics2D) bimg.getGraphics();
 //                bufferg.setRenderingHint(
 //                        RenderingHints.KEY_ANTIALIASING,
@@ -234,7 +235,7 @@ public class PaintingCanvas extends JComponent{
 		if(clean)
 		{
 			bufferg.setColor(kirtanya);
-			bufferg.fillRect(0, 0, bimg.getWidth(), bimg.getHeight());
+			bufferg.fillRect(0, 0, bimg.getWidth(null), bimg.getHeight(null));
 			
 			redrawArea(0,0,viewport.startres, viewport.startseq, viewport.width, viewport.height);
 			clean = false;
@@ -247,23 +248,23 @@ public class PaintingCanvas extends JComponent{
 			int ydiff = oldseqbuffered - viewport.startseq;
 			if(xdiff > 0) //scroll left
 			{
-				bufferg.copyArea(0, 0, OSTools.retinaMultiplier*(viewport.width-xdiff)*viewport.fontWidth, bimg.getHeight(), OSTools.retinaMultiplier*xdiff*viewport.fontWidth, 0);
+				bufferg.copyArea(0, 0, OSTools.retinaMultiplier*(viewport.width-xdiff)*viewport.fontWidth, bimg.getHeight(null), OSTools.retinaMultiplier*xdiff*viewport.fontWidth, 0);
 				redrawArea(0,0, viewport.startres,viewport.startseq,xdiff, viewport.height);
 			}
 			else if(xdiff < 0) //scroll right
 			{
 				//bufferg.setClip();
-				bufferg.copyArea(-OSTools.retinaMultiplier*(xdiff)*viewport.fontWidth, 0, OSTools.retinaMultiplier*(viewport.width+xdiff)*viewport.fontWidth, bimg.getHeight(), OSTools.retinaMultiplier*xdiff*viewport.fontWidth, 0);
+				bufferg.copyArea(-OSTools.retinaMultiplier*(xdiff)*viewport.fontWidth, 0, OSTools.retinaMultiplier*(viewport.width+xdiff)*viewport.fontWidth, bimg.getHeight(null), OSTools.retinaMultiplier*xdiff*viewport.fontWidth, 0);
 				redrawArea(viewport.width +xdiff, 0, viewport.endres +  xdiff + 1, viewport.startseq, -xdiff, viewport.height);
 			}
 			if(ydiff > 0)//scroll up
 			{
-				bufferg.copyArea(0, 0, bimg.getWidth(), OSTools.retinaMultiplier*(viewport.height - ydiff)*viewport.fontHeight, 0, OSTools.retinaMultiplier*ydiff*viewport.fontHeight);
+				bufferg.copyArea(0, 0, bimg.getWidth(null), OSTools.retinaMultiplier*(viewport.height - ydiff)*viewport.fontHeight, 0, OSTools.retinaMultiplier*ydiff*viewport.fontHeight);
 				redrawArea(0, 0, viewport.startres, viewport.startseq, viewport.width, ydiff);
 			}
 			else if (ydiff < 0) //scroll down
 			{
-				bufferg.copyArea(0, -OSTools.retinaMultiplier*ydiff*viewport.fontHeight, bimg.getWidth(), OSTools.retinaMultiplier*(viewport.height + ydiff)*viewport.fontHeight, 0, OSTools.retinaMultiplier*ydiff*viewport.fontHeight);
+				bufferg.copyArea(0, -OSTools.retinaMultiplier*ydiff*viewport.fontHeight, bimg.getWidth(null), OSTools.retinaMultiplier*(viewport.height + ydiff)*viewport.fontHeight, 0, OSTools.retinaMultiplier*ydiff*viewport.fontHeight);
 				redrawArea(0, viewport.height+ydiff, viewport.startres, viewport.endseq + 1 +ydiff, viewport.width, -ydiff);
 			}
 			if(!Alignment.al.changed.isEmpty())
@@ -301,7 +302,7 @@ public class PaintingCanvas extends JComponent{
 				rp.location[0] = startres+j;
 				rp.location[1] = startseq+i;
 				final Residue r = Alignment.al.get(startseq+i).get(startres+j);
-				bufferg.setFont(font2.deriveFont(2f*font2.getSize()));
+				bufferg.setFont(font2.deriveFont(OSTools.retinaMultiplier*1f*font2.getSize()));
 				if(Alignment.al.columnIsSticky.get(startres+ j))
 				{
 					oldfont = bufferg.getFont();
@@ -332,20 +333,20 @@ public class PaintingCanvas extends JComponent{
 		}
 	}
 	
-	public void invertResidue(Residue r)
-	{
-		//DOESNT WORK AT ALL LOL
-		Color col;
-		for(int i = 0; i < viewport.fontHeight; i++)
-			for(int j = 0; j < viewport.fontWidth; i++)
-			{
-				int pixel = bimg.getRGB(j, i);
-				col = new Color (pixel, true);
-				col = new Color(Math.abs(col.getRed() - 255),
-                        Math.abs(col.getGreen() - 255), Math.abs(col.getBlue() - 255));
-				//bimg.setRGB(y, y, rgb);
-			}
-	}
+//	public void invertResidue(Residue r)
+//	{
+//		//DOESNT WORK AT ALL LOL
+//		Color col;
+//		for(int i = 0; i < viewport.fontHeight; i++)
+//			for(int j = 0; j < viewport.fontWidth; i++)
+//			{
+//				int pixel = bimg.getRGB(j, i);
+//				col = new Color (pixel, true);
+//				col = new Color(Math.abs(col.getRed() - 255),
+//                        Math.abs(col.getGreen() - 255), Math.abs(col.getBlue() - 255));
+//				//bimg.setRGB(y, y, rgb);
+//			}
+//	}
 	
 	
 	@Override

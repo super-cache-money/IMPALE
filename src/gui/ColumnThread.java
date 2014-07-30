@@ -43,7 +43,7 @@ public class ColumnThread extends Thread
 	int desiredAnimationTime = 500;
 	int num_percentiles; // min(100,al.size())
 	int num_percentiles_sq;
-	int stalledDelayMs = 100;
+	int stalledDelayMs = 400;
 	AtomicBoolean delayCalibration;
 	int zeroAnimationTime = -1;
 	int framewaitms = 7;
