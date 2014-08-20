@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
+import java.awt.image.VolatileImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -26,7 +27,7 @@ public class PaintingCanvas extends JComponent{
 	private static final long serialVersionUID = 1L;
 	public PaintingViewport viewport;
 	InputMap savedMap = null;
-	Font font2;
+	Font font2 =new Font("Monospaced", Font.PLAIN, 12);
 	Font fontSelected;
 //	Alignment al;
 	public boolean clean;
@@ -46,6 +47,7 @@ public class PaintingCanvas extends JComponent{
     public PaintingCanvas()
 	{
 		super();
+        setDoubleBuffered(false);
        gfx_config  = GraphicsEnvironment.
                 getLocalGraphicsEnvironment().getDefaultScreenDevice().
                 getDefaultConfiguration();
@@ -70,7 +72,6 @@ public class PaintingCanvas extends JComponent{
 
 		setOpaque(true);
 		//font2 = new Font("Monospaced", Font.PLAIN, 12);
-		font2 = new Font("Monospaced", Font.PLAIN, 12);
 		fontSelected = new Font("Monospaced", Font.BOLD, 10);
 		viewport = new PaintingViewport( getSize(), getFontMetrics(font2), this);
 		
@@ -160,7 +161,7 @@ public class PaintingCanvas extends JComponent{
 	{
         Graphics2D g = (Graphics2D) g2;
         g.setRenderingHint(RenderingHints.KEY_RENDERING,RenderingHints.VALUE_RENDER_SPEED);
-        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,RenderingHints.VALUE_INTERPOLATION_BILINEAR);
         long starttime = System.currentTimeMillis();
 		synchronized(Alignment.al.autoscrollLock)
 		{
@@ -171,10 +172,8 @@ public class PaintingCanvas extends JComponent{
 		//viewport.updateDimensions(getSize());
 		//super.paintComponent(g);
 		//g.setClip(0,0,(viewport.width - 15)*viewport.fontWidth, viewport.height*viewport.fontHeight);
-		g.setClip(g.getClip());
 		Color kirtanya = getBackground();
 			g.setColor(kirtanya);
-			g.clearRect(0, 0, getWidth(), getHeight());
 			updateBuffer();
 			//RescaleOp op = new RescaleOp(1.3f, 0, null);
 			//bimg = op.filter(bimg, null);
@@ -205,18 +204,15 @@ public class PaintingCanvas extends JComponent{
 			try{
 //			bimg = new BufferedImage(viewport.width*viewport.fontWidth, viewport.height*viewport.fontHeight, BufferedImage.TYPE_INT_ARGB);
 
-                bimg = gfx_config.createCompatibleImage(OSTools.retinaMultiplier*viewport.width*viewport.fontWidth, OSTools.retinaMultiplier*viewport.height*viewport.fontHeight);
+                bimg = gfx_config.createCompatibleVolatileImage(OSTools.retinaMultiplier*viewport.width*viewport.fontWidth, OSTools.retinaMultiplier*viewport.height*viewport.fontHeight);
                 bimg.setAccelerationPriority(1);
 			bufferg =   (Graphics2D) bimg.getGraphics();
 //                bufferg.setRenderingHint(
 //                        RenderingHints.KEY_ANTIALIASING,
 //                        RenderingHints.VALUE_ANTIALIAS_ON);
 //
-                bufferg.setRenderingHint(
-                        RenderingHints.KEY_TEXT_ANTIALIASING,
-                        RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-                bufferg.setRenderingHint(RenderingHints.KEY_RENDERING,RenderingHints.VALUE_RENDER_SPEED);
+
 
 			}
 			catch(IllegalArgumentException lol)
@@ -303,30 +299,30 @@ public class PaintingCanvas extends JComponent{
 				rp.location[1] = startseq+i;
 				final Residue r = Alignment.al.get(startseq+i).get(startres+j);
 				bufferg.setFont(font2.deriveFont(OSTools.retinaMultiplier*1f*font2.getSize()));
-				if(Alignment.al.columnIsSticky.get(startres+ j))
+                Image resImg;
+				if(Alignment.al.columnIsSticky.get(startres+ j) && viewport.selected.contains(rp))
+                {
+                    resImg = Residue.imageSelectedStickyMap.get(r.getType());
+                }
+                else if(viewport.selected.contains(rp))
 				{
-					oldfont = bufferg.getFont();
-					bufferg.setFont(new Font(oldfont.getName(), oldfont.getStyle() + Font.BOLD, oldfont.getSize()));
+                    resImg = Residue.imageSelectedMap.get(r.getType());
+
 				}
-				if(viewport.selected.contains(rp))
-				{
-					//System.out.println("INVERSE " + r.colour + r.inverse);
-					bufferg.setColor(r.getInverse());
-					bufferg.fillRect(OSTools.retinaMultiplier*viewport.fontWidth*(startrespos + j), OSTools.retinaMultiplier*viewport.fontHeight*(startseqpos+i), OSTools.retinaMultiplier*viewport.fontWidth, OSTools.retinaMultiplier*viewport.fontHeight);
-					bufferg.setColor(Color.WHITE);
-					oldfont = bufferg.getFont();
-					bufferg.setFont(new Font(oldfont.getName(), oldfont.getStyle() + Font.ITALIC, oldfont.getSize()));
-				}
+                else if(Alignment.al.columnIsSticky.get(startres+ j))
+                {
+                    resImg = Residue.imageStickyMap.get(r.getType());
+
+                }
 				else
 				{
-				bufferg.setColor(r.getColor());
-				bufferg.fillRect(OSTools.retinaMultiplier*viewport.fontWidth*(startrespos + j), OSTools.retinaMultiplier*viewport.fontHeight*(startseqpos+i), OSTools.retinaMultiplier*viewport.fontWidth, OSTools.retinaMultiplier*viewport.fontHeight);
-				bufferg.setColor(Color.BLACK);
-				
+                    resImg = Residue.imageMap.get(r.getType());
+
 				}
+                    bufferg.drawImage(resImg,OSTools.retinaMultiplier*viewport.fontWidth*(startrespos+j), OSTools.retinaMultiplier*viewport.fontHeight*(startseqpos+i),null);
 				//There is a height offset
 				//also, each string shifted 1 to the right
-				bufferg.drawString(r.toString(), OSTools.retinaMultiplier*viewport.fontWidth*(startrespos+j) + 1, OSTools.retinaMultiplier*viewport.fontHeight*(startseqpos+i) +  OSTools.retinaMultiplier*viewport.heightOffset);
+//				bufferg.drawString(r.toString(), OSTools.retinaMultiplier*viewport.fontWidth*(startrespos+j) + 1, OSTools.retinaMultiplier*viewport.fontHeight*(startseqpos+i) +  OSTools.retinaMultiplier*viewport.heightOffset);
 				
 				
 			}
@@ -749,7 +745,8 @@ public class PaintingCanvas extends JComponent{
 			Iterator<ResiduePos>iter2 = cs.iterator();
 			while(iter2.hasNext())
 			{
-				ResiduePos current = iter2.next();
+
+                ResiduePos current = iter2.next();
 				Alignment.al.changed.add(new ResiduePos(current.location[0], current.location[1]));
 				if(current.location[1]<Alignment.al.size()-1)
 				{

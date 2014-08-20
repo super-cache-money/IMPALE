@@ -149,7 +149,16 @@ public RunEverything(Alignment al)
 //			           .getProtectionDomain().getCodeSource().getLocation().toURI().getPath(); 
 //		CodeSource codeSource = RunEverything.class.getProtectionDomain().getCodeSource();
 		File jarfile = null;
-		String path=ClassLoader.getSystemClassLoader().getResource(".").getPath();
+        String path = "";
+        try {
+            path = ClassLoader.getSystemClassLoader().getResource(".").getPath();
+        }
+        catch (NullPointerException np)
+        {
+            np.printStackTrace(); //it is actually a problem
+            System.exit(1);
+        }
+
 	    System.out.println("path to jar:" + path);
 		jarfile = new File( path);
 //		String parent = jarfile.getParent();

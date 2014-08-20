@@ -2,6 +2,7 @@ package gui;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -17,6 +18,7 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
@@ -657,6 +659,14 @@ public class MainMenu extends JMenuBar{
 		@Override
 		public void actionMeat(ActionEvent e) {
             System.out.println("RETINA? " + OSTools.isRetina());
+            Residue.buildImageMaps();
+            Image bi = Residue.imageMap.get(Residue.ResidueType.A);
+            File outputfile = new File("saved2.png");
+            try {
+                ImageIO.write((BufferedImage) bi, "png", outputfile);
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
 
 //
 //            if(SimilarEngine.firstExtend)

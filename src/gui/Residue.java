@@ -2,9 +2,11 @@ package gui;
 //PLEASE BE HERE
 //IF THIS IS HERE...
 
-import java.awt.Color;
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.EnumMap;
 
 import javax.swing.JOptionPane;
 //nucleotideIndex['A'] = 0;
@@ -28,15 +30,20 @@ import javax.swing.JOptionPane;
 //nucleotideIndex['N'] = 9;
 //nucleotideIndex['n'] = 9;
 public class Residue implements Comparable, Serializable {
+    static RenderingHints hints;
+
+
 	public static Residue blank;
 	public static Color []  AAColorMap = {new Color(255,87,87), new Color(255,129,87), new Color(255,171,87), new Color(255,213,87), new Color(255,255,87), new Color(213,255,87), new Color(171,255,87), new Color(129,255,87), new Color(87,255,87), new Color(87,255,129), new Color(87,255,171), new Color(87,255,213), new Color(87,255,255), new Color(87,213,255), new Color(87,171,255), new Color(87,129,255), new Color(87,87,255), new Color(129,87,255), new Color(171,87,255), new Color(213,87,255), new Color(255,87,255), new Color(255,87,213), new Color(255,87,171), new Color(255,87,129)};
 	public static Color [] AAInverseMap;
 	static Color [] DNAinverses = new Color[18];
-	boolean unknownShown = false;
+    private static float imageAccel = 1.0f;
+    boolean unknownShown = false;
 	static Color [] DNAcolors = new Color [18];
 	  static int[][] DNAsubstitution = new int [17][17];
 	  static int [] [] AAsubstitution;
     public static ArrayList<ArrayList<Integer>> ambiguityMap;
+    public static EnumMap<ResidueType,Image> imageMap, imageSelectedMap, imageStickyMap,imageSelectedStickyMap;
 
     public String toTranslatedString() {
         return null;
@@ -166,6 +173,7 @@ public class Residue implements Comparable, Serializable {
 			return true;
 		return false;
 	}
+
 
 	public Residue(char in)
 	{
@@ -507,5 +515,175 @@ public class Residue implements Comparable, Serializable {
         ambiguityMap.set(15, ambiguityMap.get(14));
         ambiguityMap.set(23, ambiguityMap.get(14)); //it's any
     }
+    
+    public static void buildImageMaps()
+    {
+
+        hints = new RenderingHints(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        hints.put(RenderingHints.KEY_RENDERING,RenderingHints.VALUE_RENDER_QUALITY);
+        hints.put(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
+        hints.put(RenderingHints.KEY_FRACTIONALMETRICS,RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+        imageMap = new EnumMap<ResidueType, Image>(ResidueType.class);
+        imageSelectedMap = new EnumMap<ResidueType, Image>(ResidueType.class);
+        imageStickyMap = new EnumMap<ResidueType, Image>(ResidueType.class);
+        imageSelectedStickyMap = new EnumMap<ResidueType, Image>(ResidueType.class);
+        int fontHeight = Alignment.al.panel.canvas.viewport.fontHeight;
+        int fontWidth = Alignment.al.panel.canvas.viewport.fontWidth;
+        int fontStartX = 1;
+        int fontStartY = OSTools.retinaMultiplier*Alignment.al.panel.canvas.viewport.heightOffset;
+
+
+        for(Residue.ResidueType type : Residue.ResidueType.values())
+        {
+                        Image curr = Alignment.al.panel.canvas.gfx_config.createCompatibleImage(OSTools.retinaMultiplier*fontWidth,OSTools.retinaMultiplier*fontHeight); 
+            Graphics2D currG = (Graphics2D) curr.getGraphics();
+            currG.setRenderingHints(hints);
+            currG.setFont(Alignment.al.panel.canvas.font2.deriveFont(OSTools.retinaMultiplier*1f*Alignment.al.panel.canvas.font2.getSize()));
+            //sticky
+                Font oldfont = currG.getFont();
+                currG.setFont(new Font(oldfont.getName(), oldfont.getStyle() + Font.BOLD, oldfont.getSize()));
+
+            //selected
+                currG.setColor(new Residue(type).getInverse());
+                currG.fillRect(0,0, OSTools.retinaMultiplier*fontWidth, OSTools.retinaMultiplier*fontHeight);
+
+            BufferedImage bi = Alignment.al.panel.canvas.gfx_config.createCompatibleImage(curr.getWidth(null),curr.getHeight(null));
+            Graphics2D big = bi.createGraphics();
+            big.setColor(currG.getColor());
+            big.fillRect(0,0,curr.getWidth(null),curr.getHeight(null));
+            currG.drawImage(bi,null,0,0);
+
+
+            currG.setColor(Color.WHITE);
+            oldfont = currG.getFont();
+                currG.setFont(new Font(oldfont.getName(), oldfont.getStyle() + Font.ITALIC, oldfont.getSize()));
+
+
+            //notSelected
+//                currG.setColor(new Residue(type).getColor());
+//                currG.fillRect(0,0, OSTools.retinaMultiplier*fontWidth, OSTools.retinaMultiplier*fontHeight);
+//                currG.setColor(Color.BLACK);
+
+            currG.drawString(new Residue(type).toString(), fontStartX, fontStartY);
+            curr.setAccelerationPriority(imageAccel);
+
+            imageSelectedStickyMap.put(type,curr);
+
+
+        }
+
+        for(Residue.ResidueType type : Residue.ResidueType.values())
+        {
+                        Image curr = Alignment.al.panel.canvas.gfx_config.createCompatibleImage(OSTools.retinaMultiplier*fontWidth,OSTools.retinaMultiplier*fontHeight); 
+            Graphics2D currG = (Graphics2D) curr.getGraphics();
+            currG.setRenderingHints(hints);
+            currG.setFont(Alignment.al.panel.canvas.font2.deriveFont(OSTools.retinaMultiplier*1f*Alignment.al.panel.canvas.font2.getSize()));
+            //sticky
+            Font oldfont = currG.getFont();
+            currG.setFont(new Font(oldfont.getName(), oldfont.getStyle() + Font.BOLD, oldfont.getSize()));
+
+            //selected
+//            currG.setColor(new Residue(type).getInverse());
+//            currG.fillRect(0,0, OSTools.retinaMultiplier*fontWidth, OSTools.retinaMultiplier*fontHeight);
+//            currG.setColor(Color.WHITE);
+//            oldfont = currG.getFont();
+//            currG.setFont(new Font(oldfont.getName(), oldfont.getStyle() + Font.ITALIC, oldfont.getSize()));
+
+
+            //notSelected
+                currG.setColor(new Residue(type).getColor());
+                currG.fillRect(0,0, OSTools.retinaMultiplier*fontWidth, OSTools.retinaMultiplier*fontHeight);
+
+            BufferedImage bi = Alignment.al.panel.canvas.gfx_config.createCompatibleImage(curr.getWidth(null),curr.getHeight(null));
+            Graphics2D big = bi.createGraphics();
+            big.setColor(currG.getColor());
+            big.fillRect(0,0,curr.getWidth(null),curr.getHeight(null));
+            currG.drawImage(bi,null,0,0);
+
+            currG.setColor(Color.BLACK);
+
+            currG.drawString(new Residue(type).toString(), fontStartX, fontStartY);
+            curr.setAccelerationPriority(imageAccel);
+
+            imageStickyMap.put(type,curr);
+
+
+        }
+
+        for(Residue.ResidueType type : Residue.ResidueType.values())
+        {
+                        Image curr = Alignment.al.panel.canvas.gfx_config.createCompatibleImage(OSTools.retinaMultiplier*fontWidth,OSTools.retinaMultiplier*fontHeight); 
+            
+            Graphics2D currG = (Graphics2D) curr.getGraphics();
+            currG.setRenderingHints(hints);
+            currG.setFont(Alignment.al.panel.canvas.font2.deriveFont(OSTools.retinaMultiplier*1f*Alignment.al.panel.canvas.font2.getSize()));
+                        Font oldfont = currG.getFont();
+//            //sticky
+//            currG.setFont(new Font(oldfont.getName(), oldfont.getStyle() + Font.BOLD, oldfont.getSize()));
+
+            //selected
+            currG.setColor(new Residue(type).getInverse());
+            currG.fillRect(0,0, OSTools.retinaMultiplier*fontWidth, OSTools.retinaMultiplier*fontHeight);
+
+            BufferedImage bi = Alignment.al.panel.canvas.gfx_config.createCompatibleImage(curr.getWidth(null),curr.getHeight(null));
+            Graphics2D big = bi.createGraphics();
+            big.setColor(currG.getColor());
+            big.fillRect(0,0,curr.getWidth(null),curr.getHeight(null));
+            currG.drawImage(bi,null,0,0);
+
+            currG.setColor(Color.WHITE);
+            oldfont = currG.getFont();
+            currG.setFont(new Font(oldfont.getName(), oldfont.getStyle() + Font.ITALIC, oldfont.getSize()));
+
+
+            //notSelected
+//                currG.setColor(new Residue(type).getColor());
+//                currG.fillRect(0,0, OSTools.retinaMultiplier*fontWidth, OSTools.retinaMultiplier*fontHeight);
+//                currG.setColor(Color.BLACK);
+
+            currG.drawString(new Residue(type).toString(), fontStartX, fontStartY);
+            curr.setAccelerationPriority(imageAccel);
+            imageSelectedMap.put(type,curr);
+
+
+        }
+
+        for(Residue.ResidueType type : Residue.ResidueType.values())
+        {
+                        Image curr = Alignment.al.panel.canvas.gfx_config.createCompatibleImage(OSTools.retinaMultiplier*fontWidth,OSTools.retinaMultiplier*fontHeight); 
+            Graphics2D currG = (Graphics2D) curr.getGraphics();
+            currG.setRenderingHints(hints);
+            currG.setFont(Alignment.al.panel.canvas.font2.deriveFont(OSTools.retinaMultiplier*1f*Alignment.al.panel.canvas.font2.getSize()));
+            //sticky
+//            Font oldfont = currG.getFont();
+//            currG.setFont(new Font(oldfont.getName(), oldfont.getStyle() + Font.BOLD, oldfont.getSize()));
+
+            //selected
+//            currG.setColor(new Residue(type).getInverse());
+//            currG.fillRect(0,0, OSTools.retinaMultiplier*fontWidth, OSTools.retinaMultiplier*fontHeight);
+//            currG.setColor(Color.WHITE);
+//            oldfont = currG.getFont();
+//            currG.setFont(new Font(oldfont.getName(), oldfont.getStyle() + Font.ITALIC, oldfont.getSize()));
+
+
+//            notSelected
+            currG.setColor(new Residue(type).getColor());
+            currG.fillRect(0,0, OSTools.retinaMultiplier*fontWidth, OSTools.retinaMultiplier*fontHeight);
+
+            BufferedImage bi = Alignment.al.panel.canvas.gfx_config.createCompatibleImage(curr.getWidth(null),curr.getHeight(null));
+            Graphics2D big = bi.createGraphics();
+            big.setColor(currG.getColor());
+            big.fillRect(0,0,curr.getWidth(null),curr.getHeight(null));
+            currG.drawImage(bi,null,0,0);
+
+            currG.setColor(Color.BLACK);
+            currG.drawString(new Residue(type).toString(), fontStartX, fontStartY);
+            curr.setAccelerationPriority(imageAccel);
+            imageMap.put(type,curr);
+
+
+        }
+    }
+    
 
 }

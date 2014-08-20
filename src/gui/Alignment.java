@@ -1027,6 +1027,8 @@ public class Alignment extends ArrayList<Sequence>{
 		ubuntuReleasedFix.install(); //uninstalled in static disposeCurrent method.
 
         IO.loadSettings();
+     Residue.buildImageMaps();
+
  }
  
  public void alignSelectedRegion2(){return;}
