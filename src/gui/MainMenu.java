@@ -1,7 +1,10 @@
 package gui;
 
+import javafx.beans.property.adapter.JavaBeanProperty;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ComponentEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
@@ -21,6 +24,8 @@ import java.util.regex.Pattern;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 public class MainMenu extends JMenuBar{
     abstract class SettingsPanel extends JPanel{
@@ -37,6 +42,7 @@ public class MainMenu extends JMenuBar{
 	public JMenu file, edit, options, recentFilesMenu, macrosMenu,zoomMenu;
 	JMenuItem translateItem, settingsItem, alignmentInfoItem,  debuggingItem,similarSelectItem, alignItem,similarOptionItem, muscleItem,openItem, saveItem, saveAsItem,prefItem, undoItem, redoItem, recomputeItem, exitItem, blankItem, resItem, delItem, scoringOptionsItem, stickyOptionsItem, loadAminoAcidMatrix;
 	JCheckBoxMenuItem enableScoringItem, enableResDeleteItem;
+    JSlider retinaQualitySlider;
     //TODO implement enableScoringItem
 	JRadioButtonMenuItem radioProfile, radioMax;
 	ButtonGroup snapGroup,zoomGroup;
@@ -45,6 +51,7 @@ public class MainMenu extends JMenuBar{
 	boolean recentFilesSet = false;
 	boolean macroSet = false;
     boolean scoringChanged = false;
+
     Dimension settingsWindowSize = new Dimension(470,350);
 
     String muscle_ClusteringMethod12  = "UPGMB";
@@ -122,6 +129,29 @@ public class MainMenu extends JMenuBar{
         options.add(recomputeItem);
         options.add(alignmentInfoItem);
         options.add(settingsItem);
+        if(OSTools.isRetina())
+        {
+            retinaQualitySlider = new JSlider(SwingConstants.HORIZONTAL, 0, 100, 0);
+            retinaQualitySlider.addChangeListener(new ChangeListener() {
+                @Override
+                public void stateChanged(ChangeEvent e) {
+                    JSlider source = (JSlider)e.getSource();
+                    if (!source.getValueIsAdjusting()) {
+                        int newValue = (int)source.getValue();
+
+                        float newRetinaMult = (1f+(newValue+0f)/100f);
+                        System.out.println("retMult " + newRetinaMult );
+                        //TODO maybe only change mult if it hasn't been changed already
+                        OSTools.retinaMultiplier=newRetinaMult;
+                        Residue.buildImageMaps();
+                        Alignment.al.panel.canvas.viewport.componentResized(null);
+//                        Alignment.al.panel.canvas.viewport.updateDimensions(Alignment.al.panel.canvas.getSize());
+
+                    }
+                }
+            });
+            options.add(retinaQualitySlider);
+        }
 		snapGroup.add(radioProfile);
 		snapGroup.add(radioMax);
 		snapGroup.setSelected(radioProfile.getModel(),true);
