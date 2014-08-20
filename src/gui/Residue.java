@@ -530,12 +530,23 @@ public class Residue implements Comparable, Serializable {
         int fontHeight = Alignment.al.panel.canvas.viewport.fontHeight;
         int fontWidth = Alignment.al.panel.canvas.viewport.fontWidth;
         int fontStartX = 1;
-        int fontStartY = OSTools.retinaMultiplier*Alignment.al.panel.canvas.viewport.heightOffset;
+        int fontStartY = (int) (OSTools.retinaMultiplier*Alignment.al.panel.canvas.viewport.heightOffset);
 
 
         for(Residue.ResidueType type : Residue.ResidueType.values())
         {
-                        Image curr = Alignment.al.panel.canvas.gfx_config.createCompatibleImage(OSTools.retinaMultiplier*fontWidth,OSTools.retinaMultiplier*fontHeight); 
+            Image curr;
+
+            //volatile images are fast but may not be preserved by the system.
+            if(OSTools.isWindows())
+            {
+                curr = Alignment.al.panel.canvas.gfx_config.createCompatibleImage((int)(OSTools.retinaMultiplier*fontWidth), (int) (OSTools.retinaMultiplier*fontHeight));
+
+            }
+            else {
+
+                curr = Alignment.al.panel.canvas.gfx_config.createCompatibleVolatileImage((int) (OSTools.retinaMultiplier * fontWidth), (int) (OSTools.retinaMultiplier * fontHeight));
+            }
             Graphics2D currG = (Graphics2D) curr.getGraphics();
             currG.setRenderingHints(hints);
             currG.setFont(Alignment.al.panel.canvas.font2.deriveFont(OSTools.retinaMultiplier*1f*Alignment.al.panel.canvas.font2.getSize()));
@@ -545,7 +556,7 @@ public class Residue implements Comparable, Serializable {
 
             //selected
                 currG.setColor(new Residue(type).getInverse());
-                currG.fillRect(0,0, OSTools.retinaMultiplier*fontWidth, OSTools.retinaMultiplier*fontHeight);
+                currG.fillRect(0,0, (int)(OSTools.retinaMultiplier*fontWidth), (int) (OSTools.retinaMultiplier*fontHeight));
 
             BufferedImage bi = Alignment.al.panel.canvas.gfx_config.createCompatibleImage(curr.getWidth(null),curr.getHeight(null));
             Graphics2D big = bi.createGraphics();
@@ -574,7 +585,7 @@ public class Residue implements Comparable, Serializable {
 
         for(Residue.ResidueType type : Residue.ResidueType.values())
         {
-                        Image curr = Alignment.al.panel.canvas.gfx_config.createCompatibleImage(OSTools.retinaMultiplier*fontWidth,OSTools.retinaMultiplier*fontHeight); 
+                        Image curr = Alignment.al.panel.canvas.gfx_config.createCompatibleImage((int)(OSTools.retinaMultiplier*fontWidth), (int) (OSTools.retinaMultiplier*fontHeight));
             Graphics2D currG = (Graphics2D) curr.getGraphics();
             currG.setRenderingHints(hints);
             currG.setFont(Alignment.al.panel.canvas.font2.deriveFont(OSTools.retinaMultiplier*1f*Alignment.al.panel.canvas.font2.getSize()));
@@ -592,7 +603,7 @@ public class Residue implements Comparable, Serializable {
 
             //notSelected
                 currG.setColor(new Residue(type).getColor());
-                currG.fillRect(0,0, OSTools.retinaMultiplier*fontWidth, OSTools.retinaMultiplier*fontHeight);
+                currG.fillRect(0,0, (int)(OSTools.retinaMultiplier*fontWidth), (int) (OSTools.retinaMultiplier*fontHeight));
 
             BufferedImage bi = Alignment.al.panel.canvas.gfx_config.createCompatibleImage(curr.getWidth(null),curr.getHeight(null));
             Graphics2D big = bi.createGraphics();
@@ -612,8 +623,8 @@ public class Residue implements Comparable, Serializable {
 
         for(Residue.ResidueType type : Residue.ResidueType.values())
         {
-                        Image curr = Alignment.al.panel.canvas.gfx_config.createCompatibleImage(OSTools.retinaMultiplier*fontWidth,OSTools.retinaMultiplier*fontHeight); 
-            
+                        Image curr = Alignment.al.panel.canvas.gfx_config.createCompatibleImage((int)(OSTools.retinaMultiplier*fontWidth), (int) (OSTools.retinaMultiplier*fontHeight));
+
             Graphics2D currG = (Graphics2D) curr.getGraphics();
             currG.setRenderingHints(hints);
             currG.setFont(Alignment.al.panel.canvas.font2.deriveFont(OSTools.retinaMultiplier*1f*Alignment.al.panel.canvas.font2.getSize()));
@@ -623,7 +634,7 @@ public class Residue implements Comparable, Serializable {
 
             //selected
             currG.setColor(new Residue(type).getInverse());
-            currG.fillRect(0,0, OSTools.retinaMultiplier*fontWidth, OSTools.retinaMultiplier*fontHeight);
+            currG.fillRect(0,0, (int)(OSTools.retinaMultiplier*fontWidth), (int) (OSTools.retinaMultiplier*fontHeight));
 
             BufferedImage bi = Alignment.al.panel.canvas.gfx_config.createCompatibleImage(curr.getWidth(null),curr.getHeight(null));
             Graphics2D big = bi.createGraphics();
@@ -650,7 +661,7 @@ public class Residue implements Comparable, Serializable {
 
         for(Residue.ResidueType type : Residue.ResidueType.values())
         {
-                        Image curr = Alignment.al.panel.canvas.gfx_config.createCompatibleImage(OSTools.retinaMultiplier*fontWidth,OSTools.retinaMultiplier*fontHeight); 
+                        Image curr = Alignment.al.panel.canvas.gfx_config.createCompatibleImage((int)(OSTools.retinaMultiplier*fontWidth), (int) (OSTools.retinaMultiplier*fontHeight));
             Graphics2D currG = (Graphics2D) curr.getGraphics();
             currG.setRenderingHints(hints);
             currG.setFont(Alignment.al.panel.canvas.font2.deriveFont(OSTools.retinaMultiplier*1f*Alignment.al.panel.canvas.font2.getSize()));
@@ -668,7 +679,7 @@ public class Residue implements Comparable, Serializable {
 
 //            notSelected
             currG.setColor(new Residue(type).getColor());
-            currG.fillRect(0,0, OSTools.retinaMultiplier*fontWidth, OSTools.retinaMultiplier*fontHeight);
+            currG.fillRect(0,0, (int)(OSTools.retinaMultiplier*fontWidth), (int) (OSTools.retinaMultiplier*fontHeight));
 
             BufferedImage bi = Alignment.al.panel.canvas.gfx_config.createCompatibleImage(curr.getWidth(null),curr.getHeight(null));
             Graphics2D big = bi.createGraphics();

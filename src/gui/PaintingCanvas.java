@@ -177,14 +177,14 @@ public class PaintingCanvas extends JComponent{
 			updateBuffer();
 			//RescaleOp op = new RescaleOp(1.3f, 0, null);
 			//bimg = op.filter(bimg, null);
-			g.drawImage(bimg,0,0,bimg.getWidth(null)/OSTools.retinaMultiplier,bimg.getHeight(null)/OSTools.retinaMultiplier,this);
+			g.drawImage(bimg,0,0,(int)(bimg.getWidth(null)/OSTools.retinaMultiplier), (int) (bimg.getHeight(null)/OSTools.retinaMultiplier),this);
 			//System.out.println("PRINTED CLIP!" + g.getClipBounds() + " Component size " + getSize());
 			//g.drawImage
         System.out.println("Time taken: " + (System.currentTimeMillis()-starttime));
 
 
 	}
-	
+
 	@Override public void repaint()
 	{
 //        System.out.println("Repainting..." + repaintCount);
@@ -197,14 +197,21 @@ public class PaintingCanvas extends JComponent{
 	{
 		//super.paintComponent(g);
 		//System.out.println("WHAT");
-		
+
 		Color kirtanya = getBackground();
 		if(bimg==null)
 		{//System.out.println("WIDTH" + viewport.width);
 			try{
 //			bimg = new BufferedImage(viewport.width*viewport.fontWidth, viewport.height*viewport.fontHeight, BufferedImage.TYPE_INT_ARGB);
 
-                bimg = gfx_config.createCompatibleVolatileImage(OSTools.retinaMultiplier*viewport.width*viewport.fontWidth, OSTools.retinaMultiplier*viewport.height*viewport.fontHeight);
+                if(OSTools.isWindows())
+                {
+                    bimg = gfx_config.createCompatibleImage((int) (OSTools.retinaMultiplier * viewport.width * viewport.fontWidth), (int) (OSTools.retinaMultiplier * viewport.height * viewport.fontHeight));
+
+                }
+                else {
+                    bimg = gfx_config.createCompatibleVolatileImage((int) (OSTools.retinaMultiplier * viewport.width * viewport.fontWidth), (int) (OSTools.retinaMultiplier * viewport.height * viewport.fontHeight));
+                }
                 bimg.setAccelerationPriority(1);
 			bufferg =   (Graphics2D) bimg.getGraphics();
 //                bufferg.setRenderingHint(
@@ -220,23 +227,23 @@ public class PaintingCanvas extends JComponent{
 				System.out.println("error....who gives a shit lol");
 				return;
 			}
-			
+
 			//System.out.println("WIDTH" + viewport.width);
 			//System.out.println(bufferg.getClip());
-			
+
 			//bufferg.setClip(0,0,(viewport.width - 3)*viewport.fontWidth, viewport.height*viewport.fontHeight);
 		}
-		
+
 		//Graphics2D g =  (Graphics2D) bimg.getGraphics();
 		if(clean)
 		{
 			bufferg.setColor(kirtanya);
 			bufferg.fillRect(0, 0, bimg.getWidth(null), bimg.getHeight(null));
-			
+
 			redrawArea(0,0,viewport.startres, viewport.startseq, viewport.width, viewport.height);
 			clean = false;
 		}
-		
+
 		else
 		{
 
@@ -244,23 +251,23 @@ public class PaintingCanvas extends JComponent{
 			int ydiff = oldseqbuffered - viewport.startseq;
 			if(xdiff > 0) //scroll left
 			{
-				bufferg.copyArea(0, 0, OSTools.retinaMultiplier*(viewport.width-xdiff)*viewport.fontWidth, bimg.getHeight(null), OSTools.retinaMultiplier*xdiff*viewport.fontWidth, 0);
+				bufferg.copyArea(0, 0, (int)(OSTools.retinaMultiplier*(viewport.width-xdiff)*viewport.fontWidth), bimg.getHeight(null), (int) (OSTools.retinaMultiplier*xdiff*viewport.fontWidth), 0);
 				redrawArea(0,0, viewport.startres,viewport.startseq,xdiff, viewport.height);
 			}
 			else if(xdiff < 0) //scroll right
 			{
 				//bufferg.setClip();
-				bufferg.copyArea(-OSTools.retinaMultiplier*(xdiff)*viewport.fontWidth, 0, OSTools.retinaMultiplier*(viewport.width+xdiff)*viewport.fontWidth, bimg.getHeight(null), OSTools.retinaMultiplier*xdiff*viewport.fontWidth, 0);
+				bufferg.copyArea((int)(-OSTools.retinaMultiplier*(xdiff)*viewport.fontWidth), 0, (int)(OSTools.retinaMultiplier*(viewport.width+xdiff)*viewport.fontWidth), bimg.getHeight(null), (int) (OSTools.retinaMultiplier*xdiff*viewport.fontWidth), 0);
 				redrawArea(viewport.width +xdiff, 0, viewport.endres +  xdiff + 1, viewport.startseq, -xdiff, viewport.height);
 			}
 			if(ydiff > 0)//scroll up
 			{
-				bufferg.copyArea(0, 0, bimg.getWidth(null), OSTools.retinaMultiplier*(viewport.height - ydiff)*viewport.fontHeight, 0, OSTools.retinaMultiplier*ydiff*viewport.fontHeight);
+				bufferg.copyArea(0, 0, bimg.getWidth(null), (int)(OSTools.retinaMultiplier*(viewport.height - ydiff)*viewport.fontHeight), 0, (int) (OSTools.retinaMultiplier*ydiff*viewport.fontHeight));
 				redrawArea(0, 0, viewport.startres, viewport.startseq, viewport.width, ydiff);
 			}
 			else if (ydiff < 0) //scroll down
 			{
-				bufferg.copyArea(0, -OSTools.retinaMultiplier*ydiff*viewport.fontHeight, bimg.getWidth(null), OSTools.retinaMultiplier*(viewport.height + ydiff)*viewport.fontHeight, 0, OSTools.retinaMultiplier*ydiff*viewport.fontHeight);
+				bufferg.copyArea(0, (int)(-OSTools.retinaMultiplier*ydiff*viewport.fontHeight), bimg.getWidth(null), (int)(OSTools.retinaMultiplier*(viewport.height + ydiff)*viewport.fontHeight), 0, (int) (OSTools.retinaMultiplier*ydiff*viewport.fontHeight));
 				redrawArea(0, viewport.height+ydiff, viewport.startres, viewport.endseq + 1 +ydiff, viewport.width, -ydiff);
 			}
 			if(!Alignment.al.changed.isEmpty())
@@ -278,13 +285,13 @@ public class PaintingCanvas extends JComponent{
 				this.redrawArea(0, 0, viewport.startres, viewport.startseq, viewport.width, viewport.height);
 				Alignment.al.changed.clear();
 			}
-			
+
 		}
 //
         oldresbuffered = viewport.startres;
 		oldseqbuffered = viewport.startseq;
 	}
-	
+
 	public void redrawArea(int startrespos, int startseqpos, int startres, int startseq, int width, int height)
 	{
 		if(Alignment.al.columnIsSticky==null || Alignment.al.columnIsSticky.size()==0)
@@ -319,7 +326,7 @@ public class PaintingCanvas extends JComponent{
                     resImg = Residue.imageMap.get(r.getType());
 
 				}
-                    bufferg.drawImage(resImg,OSTools.retinaMultiplier*viewport.fontWidth*(startrespos+j), OSTools.retinaMultiplier*viewport.fontHeight*(startseqpos+i),null);
+                    bufferg.drawImage(resImg,(int)(OSTools.retinaMultiplier*viewport.fontWidth*(startrespos+j)), (int)(OSTools.retinaMultiplier*viewport.fontHeight*(startseqpos+i)),null);
 				//There is a height offset
 				//also, each string shifted 1 to the right
 //				bufferg.drawString(r.toString(), OSTools.retinaMultiplier*viewport.fontWidth*(startrespos+j) + 1, OSTools.retinaMultiplier*viewport.fontHeight*(startseqpos+i) +  OSTools.retinaMultiplier*viewport.heightOffset);

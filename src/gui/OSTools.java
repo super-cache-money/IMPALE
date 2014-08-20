@@ -6,7 +6,7 @@ import java.lang.reflect.Field;
 import java.util.*;
 
 public class OSTools {
-	public static int retinaMultiplier = (isRetina()?2:1);
+	public static float retinaMultiplier = (isRetina()?1.2f:1f);
 	private static String OS = System.getProperty("os.name").toLowerCase();
  
 	public static void main(String[] args) {
